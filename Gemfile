@@ -1,7 +1,6 @@
 source "https://rubygems.org"
 
-gem "require_all"
 gem "mongo"
+gem "bson_ext"
 gem "sinatra"
 gem "sinatra-contrib"
-gem "thin"
