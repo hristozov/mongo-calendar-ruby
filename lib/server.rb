@@ -28,6 +28,8 @@ module Calendar
 
       post do
         task = JSON.parse(request.body.read)
+        p task
+        task["date"] = DateTime.parse(task["date"]).to_time
         new_id = BSON::ObjectId.new
         task[:_id] = new_id
         tasks.insert task
@@ -36,6 +38,7 @@ module Calendar
 
       put do
         task = JSON.parse(request.body.read)
+        task[:date] = DateTime.parse(task[:date]).to_time
         new_id = BSON::ObjectId.new(task[:_id])
         tasks.update({_id: new_id}, task, {multi: true})
         json tasks.find_one(_id: new_id)
