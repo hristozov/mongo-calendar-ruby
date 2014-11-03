@@ -3,11 +3,9 @@ require 'json'
 require 'sinatra/base'
 require 'sinatra/json'
 require 'sinatra/namespace'
-require_relative 'utils/object_id_monkey_patch'
 
 module Calendar
   class Server < Sinatra::Base
-    include Calendar::ObjectIdMonkeyPatch
     register Sinatra::Namespace
 
     def tasks
@@ -15,13 +13,16 @@ module Calendar
     end
 
     def prepare_before(task)
-      task['_id'] = task['id']
+      task['_id'] = BSON::ObjectId::from_string(task['id']) if task['id']
+      task['date'] = DateTime.parse(task['date']).to_time
       task.delete('id')
       task
     end
 
     def prepare_after(task)
-      task['id'] = task['_id']
+      task['id'] = task['_id'].to_s
+      # task['date'] = "2014-11-04T22:00:00.000Z";
+      task['date'] = task['date'].strftime('%FT%TZ') if task['date']
       task.delete('_id')
       task
     end
@@ -41,7 +42,6 @@ module Calendar
 
       post do
         task = prepare_before(JSON.parse(request.body.read))
-        task['date'] = DateTime.parse(task['date']).to_time
         new_id = BSON::ObjectId.new
         task['_id'] = new_id
         tasks.insert task
@@ -50,10 +50,8 @@ module Calendar
 
       put do
         task = prepare_before(JSON.parse(request.body.read))
-        task['date'] = DateTime.parse(task[:date]).to_time
-        new_id = BSON::ObjectId.new(task[:_id])
-        tasks.update({_id: new_id}, task, {multi: true})
-        json prepare_after(tasks.find_one(_id: new_id))
+        tasks.update({_id: task['_id']}, task)
+        json prepare_after(tasks.find_one(_id: task['_id']))
       end
 
       delete '/:id' do |id|
