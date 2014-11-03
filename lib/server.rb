@@ -21,7 +21,6 @@ module Calendar
 
     def prepare_after(task)
       task['id'] = task['_id'].to_s
-      # task['date'] = "2014-11-04T22:00:00.000Z";
       task['date'] = task['date'].strftime('%FT%TZ') if task['date']
       task.delete('_id')
       task
