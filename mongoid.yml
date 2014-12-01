@@ -1,0 +1,6 @@
+development:
+  sessions:
+    default:
+      database: calendar
+      hosts:
+        - localhost:27017

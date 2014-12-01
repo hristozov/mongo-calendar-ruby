@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__), 'lib/server')
-require 'mongo'
+require 'mongoid'
+
+Mongoid.load!('mongoid.yml')
 
 app = Calendar::Server
-app.set :tasks, Mongo::MongoClient.new['calendar']['tasks']
 run app
