@@ -44,13 +44,15 @@ module Calendar
         new_id = BSON::ObjectId.new
         task['_id'] = new_id
         tasks.insert_one task
-        json prepare_after(tasks.find(_id: new_id).limit(1).first)
+        just_inserted_task = tasks.find({_id: new_id}).limit(1).first
+        json prepare_after(just_inserted_task)
       end
 
       put do
         task = prepare_before(JSON.parse(request.body.read))
         tasks.update_one({_id: task['_id']}, task)
-        json prepare_after(tasks.find(_id: task['_id']).limit(1).first)
+        just_updated_task = tasks.find({_id: task['_id']}).limit(1).first
+        json prepare_after(just_updated_task)
       end
 
       delete '/:id' do |id|
